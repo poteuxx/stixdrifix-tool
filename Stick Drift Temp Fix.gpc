@@ -1,0 +1,34 @@
+#pragma METAINFO("Stick Drift Fix", 1, 1, "Kttra")
+#include <xb1.gph>
+
+/*	Created 10/14/2021
+	
+	The intention of this script is to prevent stick right
+	Particularly on the right stick, y axis
+	
+	The program is currently set assuming that your controller has
+	stick drift upwards. You need to edit it to fix your particular problem.
+	Device monitor will be helpful to see what axis and values you need to
+	change to.
+	
+	Update 8/11/14
+	Updated code
+*/
+
+main {
+	// Right stick drift correction
+	if(get_val(STICK_1_X) > -80.0 && get_val(STICK_1_X) < 80.0) {
+		set_val(STICK_1_X, 0);
+	}
+	if(get_val(STICK_1_Y) > -80.0 && get_val(STICK_1_Y) < 80.0) {
+		set_val(STICK_1_Y, 0);
+	}
+
+	// Left stick drift correction
+	if(get_val(STICK_2_X) > -80.0 && get_val(STICK_2_X) < 80.0) {
+		set_val(STICK_2_X, 0);
+	}
+	if(get_val(STICK_2_Y) > -80.0 && get_val(STICK_2_Y) < 80.0) {
+		set_val(STICK_2_Y, 0);
+	}
+}
