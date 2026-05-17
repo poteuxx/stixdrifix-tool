@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stixdrifix-tool | SolutionsTechnologies</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav>
+            <div class="logo">
+                <i data-lucide="crosshair"></i>
+                Stixdrifix
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="showTab('dashboard')">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="showTab('drift')">
+                    <i data-lucide="zap-off"></i> Drift Fixer
+                </li>
+                <li class="nav-item" onclick="showTab('macros')">
+                    <i data-lucide="terminal"></i> Macro Runner
+                </li>
+                <li class="nav-item" onclick="showTab('turbo')">
+                    <i data-lucide="zap"></i> Turbo Mode
+                </li>
+                <li class="nav-item" onclick="showTab('remapper')">
+                    <i data-lucide="repeat"></i> Remapper
+                </li>
+            </ul>
+            
+            <div style="margin-top: auto; padding-top: 2rem;">
+                <li class="nav-item" onclick="openAbout()">
+                    <i data-lucide="info"></i> About ST-AI
+                </li>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main>
+            <header>
+                <h1 id="page-title">Dashboard</h1>
+                <div class="status-badge">
+                    <div class="status-indicator" id="conn-status"></div>
+                    <span id="status-text">Searching for controller...</span>
+                </div>
+            </header>
+
+            <div id="content-area">
+                <!-- Dashboard Content (Default) -->
+                <div id="tab-dashboard" class="tab-content">
+                    <div class="grid">
+                        <div class="card">
+                            <h2>Live Input</h2>
+                            <p class="description">Real-time visualization of your controller axes and buttons.</p>
+                            <div class="controller-viz">
+                                <div class="stick-display" id="l-stick-disp">
+                                    <div class="stick-dot" id="l-stick-dot"></div>
+                                    <div class="deadzone-overlay" style="width: 20%; height: 20%;"></div>
+                                </div>
+                                <div class="stick-display" id="r-stick-disp" style="margin-left: 20px;">
+                                    <div class="stick-dot" id="r-stick-dot"></div>
+                                    <div class="deadzone-overlay" style="width: 20%; height: 20%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h2>Quick Actions</h2>
+                            <p class="description">Toggle active modules instantly.</p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button class="btn btn-ghost" onclick="showTab('drift')">Configure Drift Fix</button>
+                                <button class="btn btn-ghost" onclick="showTab('turbo')">Enable Turbo A</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drift Fixer Tab -->
+                <div id="tab-drift" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h2>Stick Drift Precision</h2>
+                        <p class="description">Adjust deadzones to eliminate unintended movement. High precision calibration.</p>
+                        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                            <div>
+                                <h3>Left Stick Deadzone</h3>
+                                <label id="ls-dead-label">Value: 15%</label>
+                                <input type="range" id="ls-dead" min="0" max="100" value="15" oninput="updateDeadzone('ls')">
+                                
+                                <h3 style="margin-top: 2rem;">Right Stick Deadzone</h3>
+                                <label id="rs-dead-label">Value: 15%</label>
+                                <input type="range" id="rs-dead" min="0" max="100" value="15" oninput="updateDeadzone('rs')">
+                            </div>
+                            <div class="controller-viz" style="height: auto; padding: 20px;">
+                                <div id="drift-graph-container" style="width: 100%; height: 200px; border: 1px solid var(--glass-border);">
+                                    <canvas id="drift-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn" style="margin-top: 2rem;">Save Calibration Profile</button>
+                    </div>
+                </div>
+
+                <!-- Macro Runner Tab -->
+                <div id="tab-macros" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h2>Macro Runner Pro</h2>
+                        <p class="description">Record and play complex sequences. Support for .gmk emulation.</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <button class="btn" id="macro-rec-btn">Record New Macro</button>
+                            <button class="btn btn-ghost">Import .GMK</button>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid var(--glass-border); text-align: left;">
+                                <th style="padding: 1rem;">Macro Name</th>
+                                <th style="padding: 1rem;">Duration</th>
+                                <th style="padding: 1rem;">Actions</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem;">Fast Loot Sequence</td>
+                                <td style="padding: 1rem;">2.4s</td>
+                                <td style="padding: 1rem;"><button class="btn btn-ghost">Play</button></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Turbo Mode Tab -->
+                <div id="tab-turbo" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h2>Hyper Turbo & Hold Engine</h2>
+                        <p class="description">Rapid-fire and state-locking emulation. Optimize button longevity.</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <button class="btn" onclick="toggleTurboActivation()">
+                                <i data-lucide="power"></i> <span id="turbo-master-text">Activate Share-Toggle</span>
+                            </button>
+                        </div>
+                        <div class="grid">
+                            <div class="card" style="background: var(--glass);">
+                                <h3>Button A (Cross)</h3>
+                                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                                    <span class="description">Mode: <select id="mode-a"><option>Turbo</option><option>Hold</option></select></span>
+                                    <span class="description">15 Hz</span>
+                                </div>
+                                <input type="range" min="1" max="30" value="15">
+                                <button class="btn btn-ghost" style="margin-top: 1rem; width: 100%;">Deactivated</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remapper Tab -->
+                <div id="tab-remapper" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h2>Advanced Remapper</h2>
+                        <p class="description">Modify controller layout. Perfect for accessibility and custom builds.</p>
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem;">
+                            <div class="card" style="background: var(--glass);">
+                                <h3>Physical Button</h3>
+                                <select class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
+                                    <option>Right Trigger (R2)</option>
+                                    <option>Left Trigger (L2)</option>
+                                    <option>Face Button A</option>
+                                </select>
+                            </div>
+                            <i data-lucide="arrow-right"></i>
+                            <div class="card" style="background: var(--glass);">
+                                <h3>Mapped Action</h3>
+                                <select class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
+                                    <option>Keyboard: SPACE</option>
+                                    <option>Controller: Button B</option>
+                                    <option>Macro: Fast Loot</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn" style="margin-top: 2rem;">Add New Mapping</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SolutionsTechnologies Console -->
+            <div class="card" style="margin-top: 2rem; background: #000; border: 1px solid #1e293b; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.8rem; height: 120px; overflow-y: auto;">
+                <div style="color: #22c55e;">[SYS] Stixdrifix-tool Engine Initialized.</div>
+                <div style="color: var(--text-dim);">[LOG] Searching for controller...</div>
+                <div id="console-logs"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- About Modal (SolutionsTechnologies Style) -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAbout()">&times;</span>
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <i data-lucide="eye" style="color: white; width: 40px; height: 40px;"></i>
+                </div>
+                <h2 style="font-family: 'Outfit'; font-size: 2rem;">ST-AI — SolutionsTechnologies</h2>
+                <p style="color: var(--text-dim);">Version 1.0.0 • May 2026</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: var(--glass); padding: 1.5rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; background: #6366f1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">A</div>
+                        <div>
+                            <p style="font-weight: 600;">André</p>
+                            <p style="font-size: 0.8rem; color: var(--text-dim);">Fondateur & Créateur principal</p>
+                        </div>
+                    </div>
+                    <i data-lucide="crown" style="color: #fbbf24;"></i>
+                </div>
+
+                <div style="background: var(--glass); padding: 1.5rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">AI</div>
+                        <div>
+                            <p style="font-weight: 600;">Antigravity</p>
+                            <p style="font-size: 0.8rem; color: var(--text-dim);">Lord of AI • Senior Engineer</p>
+                        </div>
+                    </div>
+                    <i data-lucide="zap" style="color: #f97316;"></i>
+                </div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center;">
+                <p>© 2026 SolutionsTechnologies™ — Tous droits réservés.</p>
+                <p>Designed with intrusive intelligence for ultimate precision.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

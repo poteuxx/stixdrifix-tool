@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Precision FPS",
+        "deadzones": { "ls": 0.10, "rs": 0.05 },
+        "turbo": [],
+        "remapping": { "R2": "R2" }
+    },
+    {
+        "name": "Aggressive Drift Correction",
+        "deadzones": { "ls": 0.25, "rs": 0.25 },
+        "turbo": ["Face Button A"],
+        "remapping": {}
+    }
+]
