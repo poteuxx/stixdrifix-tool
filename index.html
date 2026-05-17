@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stixdrifix-tool | SolutionsTechnologies</title>
+    <title>Stixdrifix | Ultimate Controller Drift Fixer</title>
+    <meta name="description" content="All-in-one controller management suite for stick drift, macros, and turbo mode. Built by SolutionsTechnologies.">
+    <meta name="keywords" content="stick drift fix, controller repair, gaming macros, turbo mode, gamepad calibration">
+    <meta property="og:title" content="Stixdrifix Tool">
+    <meta property="og:description" content="Professional Controller Precision Suite">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +35,10 @@
                 </li>
             </ul>
             
-            <div style="margin-top: auto; padding-top: 2rem;">
+            <div style="margin-top: auto; padding-top: 2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <button class="btn" onclick="exportGPCScript()" style="width: 100%; margin-bottom: 1rem;">
+                    <i data-lucide="download"></i> Export GPC
+                </button>
                 <li class="nav-item" onclick="openAbout()">
                     <i data-lucide="info"></i> About ST-AI
                 </li>
@@ -47,9 +49,14 @@
         <main>
             <header>
                 <h1 id="page-title">Dashboard</h1>
-                <div class="status-badge">
-                    <div class="status-indicator" id="conn-status"></div>
-                    <span id="status-text">Searching for controller...</span>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button id="real-mode-btn" class="btn btn-ghost" onclick="toggleRealMode()" style="border-color: #ef4444; color: #ef4444;">
+                        <i data-lucide="radio"></i> Enable Real Mode
+                    </button>
+                    <div class="status-badge">
+                        <div class="status-indicator" id="conn-status"></div>
+                        <span id="status-text">Searching for controller...</span>
+                    </div>
                 </div>
             </header>
 
@@ -113,21 +120,24 @@
                         <h2>Macro Runner Pro</h2>
                         <p class="description">Record and play complex sequences. Support for .gmk emulation.</p>
                         <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                            <button class="btn" id="macro-rec-btn">Record New Macro</button>
-                            <button class="btn btn-ghost">Import .GMK</button>
+                            <button class="btn" id="macro-rec-btn" onclick="startMacroRecording()">Start Recording</button>
+                            <input type="file" id="macro-upload" style="display: none;" onchange="handleMacroUpload(event)">
+                            <button class="btn btn-ghost" onclick="document.getElementById('macro-upload').click()">Import .GMK / .TXT</button>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="border-bottom: 1px solid var(--glass-border); text-align: left;">
-                                <th style="padding: 1rem;">Macro Name</th>
-                                <th style="padding: 1rem;">Duration</th>
-                                <th style="padding: 1rem;">Actions</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem;">Fast Loot Sequence</td>
-                                <td style="padding: 1rem;">2.4s</td>
-                                <td style="padding: 1rem;"><button class="btn btn-ghost">Play</button></td>
-                            </tr>
-                        </table>
+                        <div id="macro-list-container">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead style="border-bottom: 1px solid var(--glass-border); text-align: left;">
+                                    <tr>
+                                        <th style="padding: 1rem;">Macro Name</th>
+                                        <th style="padding: 1rem;">Duration</th>
+                                        <th style="padding: 1rem;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="macro-tbody">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -141,16 +151,8 @@
                                 <i data-lucide="power"></i> <span id="turbo-master-text">Activate Share-Toggle</span>
                             </button>
                         </div>
-                        <div class="grid">
-                            <div class="card" style="background: var(--glass);">
-                                <h3>Button A (Cross)</h3>
-                                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                                    <span class="description">Mode: <select id="mode-a"><option>Turbo</option><option>Hold</option></select></span>
-                                    <span class="description">15 Hz</span>
-                                </div>
-                                <input type="range" min="1" max="30" value="15">
-                                <button class="btn btn-ghost" style="margin-top: 1rem; width: 100%;">Deactivated</button>
-                            </div>
+                        <div class="grid" id="turbo-grid">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
@@ -163,23 +165,26 @@
                         <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem;">
                             <div class="card" style="background: var(--glass);">
                                 <h3>Physical Button</h3>
-                                <select class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
-                                    <option>Right Trigger (R2)</option>
-                                    <option>Left Trigger (L2)</option>
-                                    <option>Face Button A</option>
+                                <select id="remap-source" class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
+                                    <option value="0">Button 0 (A/Cross)</option>
+                                    <option value="1">Button 1 (B/Circle)</option>
+                                    <option value="6">Left Trigger (L2)</option>
+                                    <option value="7">Right Trigger (R2)</option>
                                 </select>
                             </div>
                             <i data-lucide="arrow-right"></i>
                             <div class="card" style="background: var(--glass);">
                                 <h3>Mapped Action</h3>
-                                <select class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
-                                    <option>Keyboard: SPACE</option>
-                                    <option>Controller: Button B</option>
-                                    <option>Macro: Fast Loot</option>
+                                <select id="remap-target" class="btn btn-ghost" style="width: 100%; margin-top: 10px;">
+                                    <option value="key_space">Keyboard: SPACE</option>
+                                    <option value="btn_1">Controller: Button 1</option>
+                                    <option value="macro_0">Macro: Active Sequence</option>
                                 </select>
                             </div>
                         </div>
-                        <button class="btn" style="margin-top: 2rem;">Add New Mapping</button>
+                        <button class="btn" style="margin-top: 2rem;" onclick="addNewMapping()">Add New Mapping</button>
+                        
+                        <div id="mappings-list" style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;"></div>
                     </div>
                 </div>
             </div>
